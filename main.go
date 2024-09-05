@@ -39,6 +39,21 @@ type IPALanguage struct {
 	WordsToIPAs map[string]string
 }
 
+func maxKey(x map[string]int) string {
+	if len(x) < 1 {
+		panic("empty map")
+	}
+	var maxKey = ""
+	var max = 0
+	for key, value := range x {
+		if value > max {
+			maxKey = key
+			max = value
+		}
+	}
+	return maxKey
+}
+
 func events(w http.ResponseWriter, r *http.Request) {
 	/*var verifier, err = slack.NewSecretsVerifier(r.Header, os.Getenv("SIGNING_SECRET"))
 	if err != nil {
@@ -73,6 +88,7 @@ func events(w http.ResponseWriter, r *http.Request) {
 					ipas := []string{}
 					var found = false
 					var set = false
+					var occurancesMap = map[string]int{}
 					for _, word := range words {
 						word = strings.ToLower(word)
 						found = false
@@ -82,7 +98,8 @@ func events(w http.ResponseWriter, r *http.Request) {
 							if !ok {
 								continue
 							}
-							ipas = append(ipas, val+" ("+lang.LangID+")")
+							occurancesMap[lang.LangID]++
+							ipas = append(ipas, val)
 							tempFound = true
 							if set {
 								break
@@ -95,7 +112,8 @@ func events(w http.ResponseWriter, r *http.Request) {
 							ipas = append(ipas, "???")
 						}
 					}
-					var fullIPA = "/" + strings.Join(ipas, " ") + "/"
+					var most_common_lang = maxKey(occurancesMap)
+					var fullIPA = "/" + strings.Join(ipas, " ") + "/ " + most_common_lang
 					if !found {
 						api.PostMessage(event.Event.Message.Channel, slack.MsgOptionTS(event.Event.Message.ID), slack.MsgOptionText("Got partial IPA! Try loading another language with /load. Unknown IPAs have been replaced with \"???\". "+fullIPA, true))
 					} else {
@@ -116,6 +134,7 @@ func events(w http.ResponseWriter, r *http.Request) {
 			ipas := []string{}
 			var found = false
 			var set = false
+			var occurancesMap = map[string]int{}
 			for _, word := range words {
 				word = strings.ToLower(word)
 				found = false
@@ -125,7 +144,8 @@ func events(w http.ResponseWriter, r *http.Request) {
 					if !ok {
 						continue
 					}
-					ipas = append(ipas, val+" ("+lang.LangID+")")
+					occurancesMap[lang.LangID]++
+					ipas = append(ipas, val)
 					tempFound = true
 					if set {
 						break
@@ -138,7 +158,8 @@ func events(w http.ResponseWriter, r *http.Request) {
 					ipas = append(ipas, "???")
 				}
 			}
-			var fullIPA = "/" + strings.Join(ipas, " ") + "/"
+			var most_common_lang = maxKey(occurancesMap)
+			var fullIPA = "/" + strings.Join(ipas, " ") + "/ " + most_common_lang
 			if !found {
 				api.PostMessage(event.Event.Channel, slack.MsgOptionTS(event.Event.ID), slack.MsgOptionText("Got partial IPA! Try loading another language with /load. Unknown IPAs have been replaced with \"???\". "+fullIPA, true))
 			} else {
