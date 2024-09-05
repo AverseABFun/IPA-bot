@@ -1,0 +1,3 @@
+[submodule "ipa-dict"]
+	path = ipa-dict
+	url = https://github.com/open-dict-data/ipa-dict
